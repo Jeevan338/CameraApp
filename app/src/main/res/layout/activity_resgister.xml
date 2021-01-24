@@ -1,0 +1,51 @@
+<LinearLayout android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@drawable/colour2"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditText
+        android:hint="Enter the name"
+        android:layout_margin="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/name"/>
+
+    <EditText
+        android:hint="Enter the username"
+        android:layout_margin="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/username"/>
+    <EditText
+        android:hint="Enter the password"
+        android:layout_margin="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/password"/>
+    <EditText
+        android:hint="Confirm Password"
+        android:layout_margin="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/confirmpassword"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:textSize="20dp"
+        android:textColor="#EDE8B9"
+        android:background="@drawable/buttonstyle2"
+        android:layout_margin="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        android:onClick="enter"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:textSize="20dp"
+        android:textColor="#EDE8B9"
+        android:background="@drawable/buttonstyle2"
+        android:layout_margin="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back to Login"
+        android:onClick="logbtn"/>
+</LinearLayout>
