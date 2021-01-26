@@ -5,8 +5,9 @@
     android:orientation="vertical" >
 
     <TextView
+        android:textSize="40dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello" />
+        android:text="Display the converted Text" />
 
 </LinearLayout>
