@@ -1,11 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/colour3"
     android:paddingLeft="15dp"
     android:paddingTop="15dp"
+android:gravity="center"
     android:paddingRight="15dp"
+    android:background="@drawable/colour2"
 
     android:paddingBottom="15dp">
 
@@ -15,25 +17,29 @@
         android:layout_width="100dp"
         android:layout_height="100dp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
+        android:background="@drawable/buttonstyle2"
         android:visibility="gone"
         android:id="@+id/choose"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Choose" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
+        android:background="@drawable/buttonstyle2"
+
         android:visibility="gone"
         android:id="@+id/upload"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Upload" />
 
-    <Button
-        android:id="@+id/camera"
+    <androidx.appcompat.widget.AppCompatButton
+        android:background="@drawable/buttonstyle3"
+
+    android:id="@+id/camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="camera" />
-
 
 </LinearLayout>

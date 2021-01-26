@@ -1,4 +1,4 @@
-package com.example.loginapp;
+package com.project.ocrreader;
 
 import org.junit.Test;
 
