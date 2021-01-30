@@ -1,15 +1,14 @@
 package com.project.ocrreader;
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.os.AsyncTask;
-
-
+import java.io.FileOutputStream;
 
 import com.project.ocrreader.ocrsdk.Client;
-import com.project.ocrreader.ocrsdk.*;
+import com.project.ocrreader.ocrsdk.ProcessingSettings;
+import com.project.ocrreader.ocrsdk.Task;
 
-import java.io.FileOutputStream;
+import android.app.*;
+import android.content.Context;
+import android.os.AsyncTask;
 
 public class AsyncProcessTask extends AsyncTask<String, String, Boolean> {
 
@@ -52,7 +51,8 @@ public class AsyncProcessTask extends AsyncTask<String, String, Boolean> {
 			// register at http://cloud.ocrsdk.com/Account/Register
 			// More info on getting your application id and password at
 			// http://ocrsdk.com/documentation/faq/#faq3
-
+			
+			// Name of application you created
 			restClient.applicationId = "GG68768768689";
 			// You should get e-mail from ABBYY Cloud OCR SDK service with the application password
 			restClient.password = "p4JLkEphDIVLIXA03JJNwEUc";
@@ -93,7 +93,7 @@ public class AsyncProcessTask extends AsyncTask<String, String, Boolean> {
 			
 			if( task.Status == Task.TaskStatus.Completed ) {
 				publishProgress( "Downloading.." );
-				FileOutputStream fos = activity.openFileOutput(outputFile, Context.MODE_PRIVATE);
+				FileOutputStream fos = activity.openFileOutput(outputFile,Context.MODE_PRIVATE);
 				
 				try {
 					restClient.downloadResult(task, fos);
