@@ -1,192 +1,225 @@
 package com.project.ocrreader;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
-import android.os.Bundle;
+
 import android.app.Activity;
-import android.provider.DocumentsContract;
+import android.os.Build;
+import android.speech.tts.TextToSpeech;
+import android.os.Bundle;
+import android.Manifest;
+import android.content.pm.PackageManager;
+
 import android.util.Log;
-import android.view.Menu;
+import android.util.SparseArray;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.widget.TextView;
 
-import android.net.*;
-import java.io.*;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.content.Intent;
-import android.database.Cursor;
-import android.view.View;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
-import com.esafirm.imagepicker.features.ImagePicker;
-import com.esafirm.imagepicker.features.IpCons;
-import com.esafirm.imagepicker.features.ReturnMode;
-import com.esafirm.imagepicker.model.Image;
+import com.google.android.gms.vision.CameraSource;
+import com.google.android.gms.vision.Detector;
+import com.google.android.gms.vision.text.TextBlock;
+import com.google.android.gms.vision.text.TextRecognizer;
 
 
-public class  MainActivity extends Activity {
+import java.io.IOException;
+import java.util.Locale;
 
-	private static final String TAG =MainActivity.class.getSimpleName() ;
-	private final int TAKE_PICTURE = 0;
-	private final int SELECT_FILE = 1;
+public class MainActivity extends Activity implements TextToSpeech.OnInitListener {
 
-	
-	private String resultUrl = "result.txt";
-	private Image imageResult;
+	SurfaceView mCameraView;
+	TextView mTextView;
+	CameraSource mCameraSource;
+	TextToSpeech t1;
+	private TextToSpeech tts;
+
+	private static final String TAG = "MainActivity";
+	private static final int requestPermissionID = 101;
+
+
+
+
+	private void speak(String text) {
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+		} else {
+			tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+		}
+	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onDestroy() {
+		if (tts != null) {
+
+			tts.stop();
+			tts.shutdown();
+		}
+		super.onDestroy();
+	}
+
+
+
+//    private void listen() {
+//        Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+//        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+//        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+//        i.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say something");
+//
+//        try {
+//            startActivityForResult(i, 100);
+//        } catch (ActivityNotFoundException a) {
+//            Toast.makeText(LogInActivity.this, "Your device doesn't support Speech Recognition", Toast.LENGTH_SHORT).show();
+//        }
+//    }
+
+
+
+
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		t1=new TextToSpeech(this,this);
 
+		mCameraView = findViewById(R.id.surfaceView);
+		mTextView = findViewById(R.id.text_view);
+
+
+		t1.speak("hellooo", TextToSpeech.QUEUE_FLUSH, null);
+
+		startCameraSource();
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
-	}
-	
-	
-	public void captureImageFromSdCard( View view ) {
-    showPicker(101);
-    }
-	
-	public static final int MEDIA_TYPE_IMAGE = 1;
-
-	/*@SuppressLint("NewApi")
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (resultCode != Activity.RESULT_OK)
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		if (requestCode != requestPermissionID) {
+			Log.d(TAG, "Got unexpected permission result: " + requestCode);
+			super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 			return;
-
-		String imageFilePath = null;
-
-		switch (requestCode) {
-			case TAKE_PICTURE:
-				imageFilePath = getOutputMediaFileUri().getPath();
-				Log.i("Image path","path="+imageFilePath);
-				break;
-			case SELECT_FILE: {
-				Uri imageUri = data.getData();
-
-				String wholeID = DocumentsContract.getDocumentId(imageUri);
-
-				// Split at colon, use second item in the array
-				String id = wholeID.split(":")[1];
-
-				String[] column = { MediaStore.Images.Media.DATA };
-
-				// where id is equal to
-				String sel = MediaStore.Images.Media._ID + "=?";
-
-				Cursor cursor = getBaseContext().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-						column, sel, new String[]{ id }, null);
-
-				assert cursor != null;
-				int columnIndex = cursor.getColumnIndex(column[0]);
-
-				if (cursor.moveToFirst()) {
-					imageFilePath = cursor.getString(columnIndex);
-				}
-				cursor.close();
-			}
-			break;
 		}
 
-		//Remove output file
-		deleteFile(resultUrl);
-
-		Intent results = new Intent( this, ResultsActivity.class);
-		results.putExtra("IMAGE_PATH", imageFilePath);
-		results.putExtra("RESULT_PATH", resultUrl);
-		startActivity(results);
-	}*/
-
-	/*private static Uri getOutputMediaFileUri(){
-	      return Uri.fromFile(getOutputMediaFile());
+		if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+			try {
+				if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+					return;
+				}
+				mCameraSource.start(mCameraView.getHolder());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
-	*//** Create a File for saving an image or video *//*
-	private static File getOutputMediaFile(){
-	    // To be safe, you should check that the SDCard is mounted
-	    // using Environment.getExternalStorageState() before doing this.
+	private void startCameraSource() {
 
-	    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-	              Environment.DIRECTORY_PICTURES), "ABBYY Cloud OCR SDK Demo App");
-	    // This location works best if you want the created images to be shared
-	    // between applications and persist after your app has been uninstalled.
+		//Create the TextRecognizer
+		final TextRecognizer textRecognizer = new TextRecognizer.Builder(getApplicationContext()).build();
 
-	    // Create the storage directory if it does not exist
-	    if (! mediaStorageDir.exists()){
-	        if (! mediaStorageDir.mkdirs()){
-	            return null;
-	        }
-	    }
+		if (!textRecognizer.isOperational()) {
+			Log.w(TAG, "Detector dependencies not loaded yet");
+		} else {
 
-	    // Create a media file name
-	    File mediaFile = new File(mediaStorageDir.getPath() + File.separator + "image.jpg" );
+			//Initialize camerasource to use high resolution and set Autofocus on.
+			mCameraSource = new CameraSource.Builder(getApplicationContext(), textRecognizer)
+					.setFacing(CameraSource.CAMERA_FACING_BACK)
+					.setRequestedPreviewSize(1280, 1024)
+					.setAutoFocusEnabled(true)
+					.setRequestedFps(2.0f)
+					.build();
 
-	    return mediaFile;
-	}*/
+			/**
+			 * Add call back to SurfaceView and check if camera permission is granted.
+			 * If permission is granted we can start our cameraSource and pass it to surfaceView
+			 */
+			mCameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
+				@Override
+				public void surfaceCreated(SurfaceHolder holder) {
+					try {
 
-  /*  public void captureImageFromCamera( View view) {
-    	Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-    	Uri fileUri = getOutputMediaFileUri(); // create a file to save the image
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
+						if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+								Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
-        startActivityForResult(intent, TAKE_PICTURE);
-    } */
-
-	private void showPicker(int code) {
-		ImagePicker.create(this)
-				.returnMode(ReturnMode.ALL) // set whether pick and / or camera action should return immediate result or not.
-				.folderMode(true) // folder mode (false by default)
-				.toolbarFolderTitle("Select ") // folder selection title
-				.toolbarImageTitle("select") // image selection title
-				.toolbarArrowColor(Color.WHITE) // Toolbar 'up' arrow color
-				.includeVideo(false)// Show video on image picker
-				.single()
-				.showCamera(true)
-				.start(IpCons.RC_IMAGE_PICKER);
-	}
-	@Override
-	protected void onActivityResult(int requestCode, final int resultCode, Intent data) {
-		Log.v(TAG, "rcode" + requestCode);
-		if (requestCode == IpCons.RC_IMAGE_PICKER) {
-			if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
-				try {
-					if (requestCode == IpCons.RC_IMAGE_PICKER) {
-						try {
-							imageResult = ImagePicker.getFirstImageOrNull(data);
-							System.out.println(imageResult.getPath());
-							Intent results = new Intent( this, ResultsActivity.class);
-							results.putExtra("IMAGE_PATH", imageResult.getPath());
-							results.putExtra("RESULT_PATH", resultUrl);
-							startActivity(results);
-						/*	UCrop.Options options = new UCrop.Options();
-							options.setCompressionQuality(50);
-							UCrop.of(Uri.fromFile(new File(imageResult.getPath())), Uri.fromFile(new File(imageResult.getPath())))
-									.withAspectRatio(5, 5)
-									.withMaxResultSize(Utils.WIDTH, Utils.HEIGHT).withOptions(options)
-									.start(EditContact.this, UCrop.REQUEST_CROP);
-*/
-						} catch (Exception e) {
-							e.printStackTrace();
+							ActivityCompat.requestPermissions(MainActivity.this,
+									new String[]{Manifest.permission.CAMERA},
+									requestPermissionID);
+							return;
 						}
-					} else {
-						Log.v(TAG, "not cropped");
+						mCameraSource.start(mCameraView.getHolder());
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
-				return;
-			}
+
+				@Override
+				public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+				}
+
+				@Override
+				public void surfaceDestroyed(SurfaceHolder holder) {
+					mCameraSource.stop();
+				}
+			});
+
+			//Set the TextRecognizer's Processor.
+			textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
+				@Override
+				public void release() {
+				}
+
+				/**
+				 * Detect all the text from camera using TextBlock and the values into a stringBuilder
+				 * which will then be set to the textView.
+				 * */
+				@Override
+				public void receiveDetections(Detector.Detections<TextBlock> detections) {
+					final SparseArray<TextBlock> items = detections.getDetectedItems();
+					if (items.size() != 0 ){
+
+						mTextView.post(new Runnable() {
+							@Override
+							public void run() {
+								StringBuilder stringBuilder = new StringBuilder();
+								for(int i=0;i<items.size();i++){
+									TextBlock item = items.valueAt(i);
+									stringBuilder.append(item.getValue());
+									stringBuilder.append("\n");
+								}
+								mTextView.setText(stringBuilder.toString());
+
+								// speak("Cancelled!" + stringBuilder.toString());
 
 
+								//  MaryLink.load(getApplicationContext());
+
+
+							}
+						});
+					}
+				}
+			});
 		}
-		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	@Override
+	public void onInit(int status) {
+		if (status == TextToSpeech.SUCCESS) {
 
+			int result = t1.setLanguage(Locale.US);
+
+			if (result == TextToSpeech.LANG_MISSING_DATA
+					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
+				Log.e("TTS", "This Language is not supported");
+			} else {
+				//    t1.speak(contents.toString(), TextToSpeech.QUEUE_FLUSH, null);
+			}
+
+		} else {
+			Log.e("TTS", "Initilization Failed!");
+		}
+
+	}
 }
