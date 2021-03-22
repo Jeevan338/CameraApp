@@ -190,6 +190,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
 								}
 								mTextView.setText(stringBuilder.toString());
 
+								Log.d("Text",stringBuilder.toString());
+
 								// speak("Cancelled!" + stringBuilder.toString());
 
 
